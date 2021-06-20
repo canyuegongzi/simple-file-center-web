@@ -45,6 +45,21 @@ export const data = {
             createUserId: 1,
           },
         },
+        {
+          entity: {
+            id: 10,
+            parentMenuId: 9,
+            name: "/fileManage/qiNiuConfig",
+            icon: "el-icon-s-tools\n\r\n",
+            alias: "存储配置",
+            state: "ENABLE",
+            sort: 0,
+            value: "http://canyuegongzi.xyz/simple-file-center-web/#/fileManage/qiNiuConfig?hideMenus=true",
+            type: "NONE",
+            discription: "标签中心",
+            createUserId: 1,
+          },
+        },
 
 
       ],

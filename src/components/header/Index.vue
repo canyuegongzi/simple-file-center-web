@@ -1,18 +1,61 @@
 <template lang="pug">
-   .container
-        p
-            router-link(to="/home") 内容聚合系统
-        p
-            el-avatar(size="small" style="margin-top: 10px;cursor: pointer" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png")
+    .container.flex.fz-18
+        span 文件存储管理系统V1.0
+        .up-right
+            el-dropdown.login(@command='userAction')
+                img.avatar(src="~assets/images/avatar.png")
+                el-dropdown-menu(slot='dropdown')
+                    el-dropdown-item(command='logout') 登出
 </template>
 
 <script lang="ts">
   import { Vue, Prop, Watch, Emit, Component } from "vue-property-decorator";
+  import {MimeStorage} from "@/utils/localStorage";
   @Component
   export default class Header extends Vue {
+    private mineLocalStore = new MimeStorage();
     private created() {
       console.log('组件初始化');
     }
+    private userAction (val: string) {
+      console.log(val);
+      console.log(4444);
+      switch (val) {
+        case 'logout':
+          this.loginOut();
+          break;
+        case 'notice':
+          this.pushNotice()
+          break;
+        case 'changePassword':
+          this.pushChangePassword();
+          break
+        case 'userCenter':
+          this.userCenter();
+          break
+        default:
+          return;
+      }
+    }
+    private loginOut() {
+      this.mineLocalStore.removeItem('token');
+      window.location.reload();
+    }
+    private pushNotice () {
+      this.$router.push('/noticeManage/userNoticeList');
+    }
+
+    @Emit('pushChangePassword')
+    public pushChangePassword(): any {
+      return 'pushChangePassword';
+    }
+
+    @Emit('userCenter')
+    public userCenter(): any {
+      return 'userCenter';
+    }
+
+
   }
 </script>
 
@@ -26,6 +69,4 @@
             line-height 48px
             display block
             font-size 16px
-            >>>a
-                color #ffff !important
 </style>

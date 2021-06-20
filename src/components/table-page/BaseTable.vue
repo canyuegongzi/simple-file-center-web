@@ -128,7 +128,6 @@
     }
 
     private created() {
-      console.log('组件初始化');
     }
 
     private mounted() {

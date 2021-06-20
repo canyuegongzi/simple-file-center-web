@@ -1,6 +1,5 @@
 import Vue from 'vue';
 export function responseMsg(success: boolean, title: string, callback: () => void) {
-  console.log(success);
   if (success) {
     Vue.prototype.$message({
       message: title + "成功！",
@@ -30,7 +29,7 @@ export function confirmDelete(path: string, callback: () => void, params: any, s
     console.log(params);
     Vue.prototype.$post(path, params, server).then((response: any) => {
       console.log(response);
-      responseMsg(response.data.success, "删除", callback);
+      responseMsg(response.success || response.data.success, "删除", callback);
     });
   }).catch(() => { });
 }

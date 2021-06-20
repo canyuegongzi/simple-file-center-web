@@ -2,12 +2,14 @@ import { getRouter, route as allMenus } from './router';
 import {getURLParameters} from '@/utils/url-params';
 import { MimeStorage } from '@/utils/localStorage';
 import QS from 'query-string';
+import {domain, ENV, innerNet} from "@/config";
 export const session$ = {
     token: '',
     menus: [],
     hideMenus: false,
 };
-
+// @ts-ignore
+const casBaseURL = window.FILEENV.casDomain
 export const escapeCheckSession$ = () =>  {
     return new Promise((resolve) => {
         const mimeStorage = new MimeStorage();
@@ -27,7 +29,7 @@ export const escapeCheckSession$ = () =>  {
         if (sessionStorageToken === "null" || !sessionStorageToken) {
             const url = location.origin + location.pathname;
             // @ts-ignore
-            window.location.href = window.ENV.domain + window.ENV.casDomain + '?redirectUrl=' + url;
+            window.location.href = casBaseURL + '?redirectUrl=' + url;
         }
         const token = sessionStorageToken;
         Object.assign(session$, { hideMenus: hideMenus === 'true' });

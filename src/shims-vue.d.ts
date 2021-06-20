@@ -26,3 +26,6 @@ declare module '$Modal' {
 declare module '$router' {
   export const $router: any;
 }
+declare module '@riophae/vue-treeselect' {
+  export const Treeselect: any;
+}

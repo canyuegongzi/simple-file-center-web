@@ -1,8 +1,6 @@
 // @ts-ignore
 import DC from 'json-loader';
-// @ts-ignore
-const ENV = window.ENV;
-
+import { ENV } from './env';
 // 是否是内网环境
 const innerNet =  process.env.NODE_ENV === 'dev' ? true : /^(192|0|127|172|localhost)/.test(location.hostname);
 
@@ -21,7 +19,7 @@ const baseURL = /^(http:\/\/|https:\/\/)/.test(ENV.wgmsBaseWeb) ?
 
 // 用户接口地址
 const userBaseURL = /^(http:\/\/|https:\/\/)/.test(ENV.userDomain) ?
-    getDomain(ENV.userDomain, innerNet) :
+    ENV.userDomain:
     domain + ENV.userDomain;
 
 // 文件服务
@@ -30,9 +28,7 @@ const fileBaseURL = /^(http:\/\/|https:\/\/)/.test(ENV.userDomain) ?
     domain + ENV.userDomain;
 
 // 权限服务地址
-const permissionBaseURL = /^(http:\/\/|https:\/\/)/.test(ENV.permissionDomain) ?
-    getDomain(ENV.permissionDomain, innerNet) :
-    domain + ENV.permissionDomain;
+const permissionBaseURL = ''
 
 // cas单点登录地址
 const casBaseURL = /^(http:\/\/|https:\/\/)/.test(ENV.casDomain) ?

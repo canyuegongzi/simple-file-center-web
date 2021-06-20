@@ -19,6 +19,16 @@ export const route = [
       name: 'file-index',
       component: () => import('./views/file/Index.vue'),
     },
+    {
+      path: '/fileManage/AddFile',
+      name: 'file-index',
+      component: () => import('./views/file/AddFile.vue'),
+    },
+    {
+      path: '/fileManage/qiNiuConfig',
+      name: 'config-index',
+      component: () => import('./views/config/QiNiuConfig.vue'),
+    },
   ];
 
 function beforeEach(to: { matched: { length: number; }; }, from: any, next: () => void) {
@@ -28,7 +38,7 @@ function beforeEach(to: { matched: { length: number; }; }, from: any, next: () =
     // if (!token) {
     //   const url = location.href;
     //     // @ts-ignore
-    //   window.location.replace(window.ENV.domain + window.ENV.casDomain + '?redirectUrl=' + url);
+    //   window.location.replace(window.FILEENV.domain + window.FILEENV.casDomain + '?redirectUrl=' + url);
     // } else {
     //   next();
     // }

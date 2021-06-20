@@ -29,6 +29,22 @@ export const categoryApi = {
   },
 };
 export const fileApi = {
+  qiniu: {
+    method: 'post',
+    url: '/qiniu/uploadQiniu'
+  },
+  disk: {
+    method: 'post',
+    url: '/upload/add'
+  },
+  multipleQiniu: {
+    method: 'post',
+    url: '/qiniu/multipleQiniu'
+  },
+  multipleDisk: {
+    method: 'post',
+    url: '/upload/multipleDisk'
+  },
   add: {
     method: 'post',
     url: '/file/add',
@@ -40,6 +56,10 @@ export const fileApi = {
   delete: {
     method: 'delete',
     url: '/file/delete',
+  },
+  deleteQiniu: {
+    method: 'delete',
+    url: '/qiniu/deleteFile',
   },
   info: {
     method: 'get',
@@ -54,4 +74,15 @@ export const fileApi = {
     url: '/file/all',
   },
 };
+
+export const qiNiuConfigApi = {
+  info: {
+    method: 'get',
+    url: '/file/config',
+  },
+  edit: {
+    method: 'post',
+    url: '/file/editConfig',
+  },
+}
 

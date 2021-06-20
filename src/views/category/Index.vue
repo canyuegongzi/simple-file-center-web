@@ -1,6 +1,6 @@
 <template lang="pug">
     .container
-        base-header(title="文件分类" @editRow="editRow" @deleteRow="deleteRow")
+        base-header(title="文件分类" @editRow="editRow" :isDelete="false" @deleteRow="deleteRow")
         base-table(:dataFormat="tableColumn" :allowDeleteData="allowDeleteData" :tableData="tableData"  @editRow="editRow" @deleteRow="deleteRow" :handleSelectionChange="handleSelectionChange")
             .search-items(slot="table-tools")
                 .search-item
@@ -13,12 +13,12 @@
                 el-scrollbar(style="height:100%;")
                     el-form(:model="categoryInfo" :rules="categoryInfoRules" ref="form" label-width="110px" class="input-width")
                         el-form-item(label="名称：" prop="name")
-                            el-input(v-model="categoryInfo.name" size="mini"  placeholder="请输入名称")
+                            el-input(v-model="categoryInfo.name" size="mini" :disabled="dialogTitle.indexOf('编辑' )> -1"  placeholder="请输入名称")
                         el-form-item(label="父级分类：" prop="parentId")
                             el-select(v-model="categoryInfo.parentId" :disabled="formEditFlag" filterable size='mini' style="width:100%;height: 28px"  class="options")
                                 el-option(v-for="(item, index) in organizationSelectOptions" :label="item.label" :value="item.value" :key="item.value")
                         el-form-item(label="编码：" prop="code")
-                            el-input(v-model="categoryInfo.code" size="mini" :disabled="formEditFlag" placeholder="请输入编码")
+                            el-input(v-model="categoryInfo.code" size="mini" :disabled="dialogTitle.indexOf('编辑' )> -1" placeholder="请输入编码")
                         el-form-item(label="排序：" prop="sort")
                             el-input(v-model="categoryInfo.sort" size="mini"  placeholder="请输入排序")
                         el-form-item(label="描述：" prop="desc")
@@ -136,7 +136,6 @@
                 });
                 return false;
             }
-            console.log(ids);
             confirmDelete(categoryApi.delete.url, this.getData, { id: ids, isDeleteChild: 1 });
         }
 
@@ -182,6 +181,7 @@
             this.total = (response.data && response.data.data.count) || 0;
             this.tableData =
                 response.data && response.data.data ? response.data.data.data : [];
+            console.log(response)
             this.tableData.forEach((item: any) => {
                 item.editFlag = 1;
             });
@@ -252,13 +252,14 @@
         /**
          * 弹窗取消
          */
-        private cancelFun() {
+        private async cancelFun() {
             this.dialogVisible = false;
             this.categoryId = "";
             this.formEditFlag = false;
             this.dialogUserVisible = false;
             this.categoryInfo = new CategoryInfo();
-            this.getData();
+            await this.getData();
+            this.getCategoryList();
         }
 
         /**
@@ -360,7 +361,7 @@
          * @param data
          */
         private onNodeClick(e: any, data: any) {
-            console.log(data);
+
         }
 
         private async created() {

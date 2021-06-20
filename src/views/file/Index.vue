@@ -1,12 +1,37 @@
 <template lang="pug">
     .container
-        base-header(title="文件列表" @editRow="editRow" @deleteRow="deleteRow")
-        base-table(:dataFormat="tableColumn" :isAdd="false" :allowEdit="false" :allowIndex="true" :allowDeleteData="allowDeleteData" :tableData="tableData"  @editRow="editRow" @deleteRow="deleteRow" :handleSelectionChange="handleSelectionChange")
+        base-header(title="文件列表" @editRow="editRow" :isShowTool="false" :isDelete="false" @deleteRow="deleteRow")
+        base-table(:dataFormat="tableColumn"  :customTable="true" :allowDelete="false" :isAdd="false" :allowEdit="false" :allowIndex="true" :allowDeleteData="allowDeleteData" :tableData="tableData"  @editRow="editRow" @deleteRow="deleteRow" :handleSelectionChange="handleSelectionChange")
             .search-items(slot="table-tools")
                 .search-item
-                    el-input(v-model="query.queryStr" @blur="getData('search')"  @keyup.enter.native="getData('search')" placeholder="请输入标签名称搜索" size="mini" suffix-icon="el-icon-search")
+                    el-input(v-model="query.queryStr" @blur="getData('search')"  @keyup.enter.native="getData('search')" placeholder="请输入名称搜索" size="mini" suffix-icon="el-icon-search")
+                .search-item
+                    el-tooltip(content="单文件上传接口仅用于非管理系统" placement="top" effect="light")
+                        el-upload(class="upload-demo" :action="actionServer" disabled :show-file-list="false" :headers="{ignoretoken: true}" :on-change="onChangeFile" :before-upload="beforeAvatarUpload" size="mini")
+                            el-button(size="mini" type="primary") Disk存储(单)
+                    el-tooltip(content="单文件上传接口仅用于非管理系统" placement="top" effect="light")
+                        el-upload(class="upload-demo" :action="actionQiNiu" disabled :show-file-list="false" :headers="{ignoretoken: true}" :on-change="onChangeFile" :before-upload="beforeAvatarUpload" size="mini" style="margin-left: 8px")
+                            el-button(size="mini" type="primary") 七牛存储（单）
+                    el-button(size="mini" type="primary" style="margin-left: 8px" @click="addFile") 上传文件
+            .div(slot="custom-table")
+                el-table(:data="tableData" border size="mini"  ref="dataTable" @selection-change="handleSelectionChange")
+                    el-table-column(prop="index" label="序号" type="index" align="center" width="120")
+                    el-table-column(prop="name" label="名称"  align="center")
+                    el-table-column(prop="encoding" label="编码"  align="center")
+                    el-table-column(prop="size" label="大小"  align="center")
+                    el-table-column(prop="serverCategoryName" label="存储平台"  align="center")
+                    el-table-column(prop="time" label="time"  align="center")
+                    el-table-column(prop="serverCategoryName" label="存储平台"  align="center")
+                    el-table-column(prop="url" label="链接"  align="center")
+                        template( slot-scope="scope")
+                            p(@click="seeFile(scope.row)") {{scope.row.url}}
+                    el-table-column(label="操作"  align="center" width="180")
+                        template( slot-scope="scope")
+                            a(class="operate edit" @click="deleteRow(scope)") 删除
             el-pagination(slot="table-pagination" @size-change="handleSizeChange" :current-page.sync="currentPage"
             :page-size="pageSize"  layout="total, sizes, prev, pager, next, jumper" :total="total")
+        el-dialog(:visible.sync="isShowDialog" width="450px")
+            el-image(:src="imageUrl" style="margin: 16px")
         el-dialog(:visible.sync="dialogVisible" @close="dialogClose" width="450px")
             span(slot="title") {{dialogTitle}}
             div(style="height: 370px;overflow: auto; padding: 0")
@@ -31,6 +56,7 @@
     import { confirmDelete, responseMsg } from "@/utils/response";
     import {listToTree} from '@/utils/tree-data';
     import FileInfo from "./FileInfo";
+    import {MimeStorage} from "@/utils/localStorage";
     @Component({
         components: {
             BaseHeader,
@@ -47,6 +73,8 @@
             form: HTMLFormElement;
             form1: HTMLFormElement;
         };
+        public isShowDialog: boolean = false;
+        public imageUrl: string = ''
         public tableColumn = [
             { prop: "name", label: "名称", width: 180 },
             { prop: "encoding", label: "编码", width: 60 },
@@ -73,7 +101,9 @@
         public organizationSelectOptions: SelectOption[] = [];
         public categoryId: any = "";
         public authTreeData: any = [];
-
+        public actionServer: string = ''
+        public actionQiNiu: string = ''
+        private token: any;
         @Watch("currentPage", { deep: true, immediate: false })
         public currentPageChange(val: any, oldVal: any) {
             this.getData();
@@ -97,10 +127,41 @@
                 });
                 return false;
             }
-            console.log(ids);
-            confirmDelete(fileApi.delete.url, this.getData, { id: ids });
+            if (data.row.serverCategory === 0) {
+              confirmDelete(fileApi.delete.url, this.getData, { id: ids[0],  isDelFile: 1});
+            }else if (data.row.serverCategory === 1){
+              confirmDelete(fileApi.deleteQiniu.url, this.getData, { id: ids[0],  isDelFile: 1});
+            }
+
         }
 
+        public isShowImage(url: string) {
+          //获取最后一个.的位置
+          const index= url.lastIndexOf(".");
+          const ext = url.substr(index+1);
+          return ['png', 'jpg', 'jpeg', 'bmp', 'gif', 'webp', 'psd', 'svg', 'tiff'].indexOf(ext.toLowerCase()) !== -1
+        }
+
+        /**
+         * 查看文件
+         */
+        public seeFile(scope: any) {
+            if (this.isShowImage(scope.url)) {
+              this.isShowDialog = true
+              this.imageUrl = scope.url
+            }else {
+              this.$confirm(`是否下载 ${scope.name} ？`, "下载提示", {
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+                type: "info"
+              }).then(() => {
+                let a = document.createElement('a')
+                a.href = scope.url
+                a.download = scope.name
+                a.click()
+              })
+            }
+        }
         /**
          * 当前行是否可删除
          * @param row {object}
@@ -124,7 +185,32 @@
             return selectedIds.join(",");
         }
 
-        /**
+        public beforeAvatarUpload(file: any) {
+          console.log(file)
+          const res = /.*[\u4e00-\u9fa5]+.*$/.test(file.name)
+          if (res) {
+            this.$message.error('文件名不能包含中文')
+            return false
+          }
+          return true
+        }
+      /**
+       * 文件选择 // 文件上传成功 // 文件上传失败
+       * @param file {object}
+       * @param fileList {Array}  选择的文件数组
+       * @returns {boolean}
+       */
+      public onChangeFile (file: any, fileList: any) {
+        if (file.status == "success") {
+          if (file.response) {
+            this.$message.success('文件上传成功')
+            this.getData()
+          }else {
+            this.$message.error('文件上传失败')
+          }
+        }
+      }
+      /**
          * 获取数据
          * @param flag
          */
@@ -189,6 +275,15 @@
         }
 
         /**
+         * 文件上传
+         */
+        public addFile() {
+          this.$router.push({
+            path: '/fileManage/AddFile'
+          })
+          console.log(444)
+        }
+        /**
          * 获取标签info
          */
         private async geTagInfo() {
@@ -204,7 +299,14 @@
         }
 
         private async created() {
-            await this.getData();
+          const mimeStorage = new MimeStorage();
+          const token: any = mimeStorage.getItem('token');
+          // @ts-ignore
+          this.actionQiNiu = window['FILEENV'].fileDomain + fileApi.qiniu.url;
+          // @ts-ignore
+          this.actionServer = window['FILEENV'].fileDomain + fileApi.disk.url;
+          this.token = token;
+          await this.getData();
         }
     }
 </script>

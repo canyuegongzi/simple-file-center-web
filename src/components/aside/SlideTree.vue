@@ -22,7 +22,7 @@
         @Prop({ type: Array, default: () => { return []; }})
         private navMenus: any;
         private created() {
-            console.log('组件初始化');
+
         }
     }
 </script>
